@@ -1,0 +1,35 @@
+{
+  "name": "jpu",
+  "version": "1.0.0",
+  "description": "simple implementation of virtual machine",
+  "main": "jpu.js",
+  "scripts": {
+    "build": "parcel build ./src/jpu.js --global JPU",
+    "dev": "parcel watch ./src/jpu.js --global JPU",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mum-never-proud/jpu.git"
+  },
+  "keywords": [
+    "cpu",
+    "virtual",
+    "machine",
+    "js"
+  ],
+  "author": "mum-never-proud",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mum-never-proud/jpu/issues"
+  },
+  "homepage": "https://github.com/mum-never-proud/jpu#readme",
+  "devDependencies": {
+    "@babel/core": "7.10.2",
+    "@babel/preset-env": "7.10.2",
+    "eslint": "7.1.0",
+    "jest": "26.0.1",
+    "parcel": "1.12.4"
+  }
+}
