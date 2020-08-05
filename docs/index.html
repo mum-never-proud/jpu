@@ -1,0 +1,226 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>jpu</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" type="text/css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300&display=swap" rel="stylesheet" />
+  <style>
+    html,
+    body {
+      font-family: "Fira Code";
+      background-color: #121212;
+      color: #FB3;
+    }
+
+    h1,
+    h3,
+    h6 {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 32px;
+    }
+
+    h3 {
+      font-size: 24px;
+    }
+
+    textarea.form-control, textarea.form-control:focus, textarea.form-control[readonly] {
+      background-color: #222831;
+      border: 1px solid #FB3;
+      color: #FB3;
+      outline: none;
+      resize: none;
+    }
+
+    .btn-primary:disabled {
+      cursor: not-allowed;
+    }
+
+    footer {
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <p class="display-4 text-center mt-3">jpu (alpha)</p>
+        <p class="text-center font-italic mt-3">js based vm (16 bits)</p>
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div class="col-12">
+        <div class="alert alert-info">
+          <p class="text-center"><b><u>Upcoming enhancements</u></b></p>
+          <ul>
+            <li>For now only adding two registers is supported, which will be extended to support all basic arithmetic operations.</li>
+            <li>Implementation of Stack to allow VM to run subroutines without losing state.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-12">
+        <label>Program</label>
+        <textarea id="program" rows="15" class="form-control" autocomplete="off">
+mov_lit_reg 0x12 0x34 2 # copy literal 0x1234 to r1 register
+mov_lit_reg 0xab 0xcd 3 # copy literal 0xabcd to r2 register
+add_reg_reg 2 3 # add register 2 and register 3, result will be store in acc register
+# the below steps are really not necessary, just for the purpose of demonstration of other supported commands
+mov_reg_mem 1 0x12 0x34 # copy value from acc register to memory address 0x1234
+mov_reg_mem 2 0xab 0xcd # copy value from r1 register to memory address 0xabcd
+mov_mem_reg 0xab 0xcd 5 # copy value from memory address to r4 register
+        </textarea>
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div class="col-12">
+        <button id="load" class="btn btn-primary">Load Program</button>
+        <button id="step" class="btn btn-primary" disabled="disabled">Step</button>
+        <button id="run" class="btn btn-primary" disabled="disabled">Run</button>
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div class="col-12 col-md-6">
+        <label>Registers</label>
+        <textarea id="registers" rows="15" class="form-control" autocomplete="off" readonly></textarea>
+      </div>
+      <div class="col-12 mt-3 mt-md-0 col-md-6">
+        <p>Memory</p>
+        <textarea id="memory" rows="15" class="form-control" autocomplete="off" readonly></textarea>
+      </div>
+    </div>
+    <div class="row mt-3">
+      <div class="col-12">
+        <footer>
+          <p class="text-center font-italic">made with much ❤️</p>
+        </footer>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/gh/mum-never-proud/jpu/dist/jpu.js"></script>
+  <script>
+    (function () {
+      const memory = JPU.createMemory(256 * 256);
+      const writeableBytes = new Uint8Array(memory.buffer);
+      const program = document.getElementById('program');
+      const registerOutput = document.getElementById('registers');
+      const memoryOutput = document.getElementById('memory');
+      const loadBtn = document.getElementById('load');
+      const stepBtn = document.getElementById('step');
+      const runBtn = document.getElementById('run');
+      const opCodes = {
+        mov_lit_reg: 0x01,
+        mov_reg_reg: 0x02,
+        mov_mem_reg: 0x03,
+        mov_reg_mem: 0x04,
+        add_reg_reg: 0x10
+      };
+      const instructionParts = {
+        mov_lit_reg: 4,
+        mov_reg_reg: 3,
+        mov_mem_reg: 4,
+        mov_reg_mem: 4,
+        add_reg_reg: 3
+      };
+      const memoryAddress = [];
+      let instructionsCount = 0;
+      let steps = 0;
+      const jpu = new JPU(memory);
+
+      loadBtn.addEventListener('click', loadProgram);
+      program.addEventListener('input', function () {
+        if (!program.value) {
+          loadBtn.setAttribute('disabled', 'disabled');
+          stepBtn.setAttribute('disabled', 'disabled');
+          runBtn.setAttribute('disabled', 'disabled');
+        } else {
+          loadBtn.removeAttribute('disabled');
+        }
+      });
+      stepBtn.addEventListener('click', step);
+      runBtn.addEventListener('click', run);
+
+      function loadProgram() {
+        const instructions = program.value.split('\n');
+        let i = 0;
+        instructionsCount = instructions.length;
+
+        resetControls();
+        instructions
+          .forEach(instruction => {
+            const instructionChunks = instruction.split(' ');
+            const op = instructionChunks[0];
+
+            if (!opCodes[op]) {
+              instructionsCount--;
+              return;
+            }
+
+            if (op === 'mov_reg_mem') {
+              const addr = instructionChunks[2]<<8 | instructionChunks[3];
+
+              if (!memoryAddress.includes(addr)) {
+                memoryAddress.push(addr);
+              }
+            }
+
+            if (op === 'mov_mem_reg') {
+              const addr = instructionChunks[1]<<8 | instructionChunks[2];
+
+              if (!memoryAddress.includes(addr)) {
+                memoryAddress.push(addr);
+              }
+            }
+
+            writeableBytes[i++] = opCodes[op];
+
+            instructionChunks
+              .slice(1, instructionParts[op])
+              .forEach(part => {
+                writeableBytes[i++] = part;
+              });
+          });
+        viewRegisters();
+        viewMemory();
+      }
+
+      function resetControls() {
+        jpu.resetRegisters();
+        stepBtn.removeAttribute('disabled');
+        runBtn.removeAttribute('disabled');
+        steps = 0;
+      }
+
+      function viewRegisters() {
+        registerOutput.value = jpu.viewRegisters();
+      }
+
+      function viewMemory() {
+        memoryOutput.value = memoryAddress.map(addr => jpu.viewMemoryAt(addr)).join('\n');
+      }
+
+      function step() {
+        jpu.step();
+        viewRegisters();
+        viewMemory();
+        steps++;
+
+        if (steps >= instructionsCount) {
+          stepBtn.setAttribute('disabled', 'disabled');
+          runBtn.setAttribute('disabled', 'disabled');
+
+          return true;
+        }
+      }
+
+      function run() {
+        while (!step()) {}
+      }
+    })();
+  </script>
+</body>
+</html>
