@@ -16,8 +16,7 @@ class JPU {
     }
 
     this.memory = memory;
-    this.registers = createMemory(registerNames.length * 2);
-    this.registerMap = createRegisterMap(registerNames);
+    this.resetRegisters();
   }
 
   getRegister (name) {
@@ -56,6 +55,25 @@ class JPU {
     this.setRegister('ip', nextInstructionAddress + 2);
 
     return nextInstruction;
+  }
+
+  viewRegisters () {
+    return registerNames.map(name =>
+      `${name}\t\t\t${this.registers.getUint16(this.registerMap[name])}`
+    ).join('\n');
+  }
+
+  viewMemoryAt (addr) {
+    const eightBytes = Array.from({ length: 8 }, (_, i) => this.memory.getUint8(addr + i))
+      .map(v => `0x${v.toString(16).padStart(2, '0')}`)
+      .join(' ');
+
+    return `0x${addr.toString(16).padStart(4, '0')} : ${eightBytes}`;
+  }
+
+  resetRegisters() {
+    this.registers = createMemory(registerNames.length * 2);
+    this.registerMap = createRegisterMap(registerNames);
   }
 
   execute (instruction) {
@@ -117,12 +135,6 @@ class JPU {
     this.execute(this.fetch());
 
     return this;
-  }
-
-  peekMemory () {
-    return registerNames.map(name =>
-      `${name}\t\t\t${this.registers.getUint16(this.registerMap[name])}`
-    ).join('\n');
   }
 
   static createMemory (size) {
