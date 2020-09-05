@@ -2,7 +2,7 @@
   "name": "jpu",
   "version": "1.0.0",
   "description": "simple implementation of virtual machine",
-  "main": "jpu.js",
+  "main": "./dist/jpu.min.js",
   "scripts": {
     "build": "parcel build ./src/jpu.js --global JPU -o jpu.min.js",
     "dev": "parcel watch ./src/jpu.js --global JPU -o jpu.min.js",
