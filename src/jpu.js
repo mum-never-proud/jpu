@@ -3,14 +3,14 @@ import {
   MOV_REG_REG,
   MOV_MEM_REG,
   MOV_REG_MEM,
-  ADD_REG_REG
+  ADD_REG_REG,
 } from './constants/instructions';
 import createMemory from './services/create-memory';
 import createRegisterMap from './utils/create-register-map';
 import registerNames from './constants/registers';
 
 class JPU {
-  constructor (memory) {
+  constructor(memory) {
     if (!(memory instanceof DataView)) {
       throw Error('memory should be an instance of DataView, make use of JPU.createMemory(sizeInBytes)');
     }
@@ -19,27 +19,28 @@ class JPU {
     this.resetRegisters();
   }
 
-  getRegister (name) {
-    if (this.registerMap.hasOwnProperty(name)) {
+  getRegister(name) {
+    if (Object.prototype.hasOwnProperty.call(this.registerMap, name)) {
       return this.registers.getUint16(this.registerMap[name]);
     }
 
     throw Error('register not found');
   }
 
-  getRegisterOffset (idx) {
+  // eslint-disable-next-line class-methods-use-this
+  getRegisterOffset(idx) {
     return (idx % registerNames.length) * 2;
   }
 
-  setRegister (name, value) {
-    if (this.registerMap.hasOwnProperty(name)) {
+  setRegister(name, value) {
+    if (Object.prototype.hasOwnProperty.call(this.registerMap, name)) {
       return this.registers.setUint16(this.registerMap[name], value);
     }
 
     throw Error('register not found');
   }
 
-  fetch () {
+  fetch() {
     const nextInstructionAddress = this.getRegister('ip');
     const nextInstruction = this.memory.getUint8(nextInstructionAddress);
 
@@ -48,7 +49,7 @@ class JPU {
     return nextInstruction;
   }
 
-  fetch16 () {
+  fetch16() {
     const nextInstructionAddress = this.getRegister('ip');
     const nextInstruction = this.memory.getUint16(nextInstructionAddress);
 
@@ -57,15 +58,13 @@ class JPU {
     return nextInstruction;
   }
 
-  viewRegisters () {
-    return registerNames.map(name =>
-      `${name}\t\t\t${this.registers.getUint16(this.registerMap[name])}`
-    ).join('\n');
+  viewRegisters() {
+    return registerNames.map((name) => `${name}\t\t\t${this.registers.getUint16(this.registerMap[name])}`).join('\n');
   }
 
-  viewMemoryAt (addr) {
+  viewMemoryAt(addr) {
     const eightBytes = Array.from({ length: 8 }, (_, i) => this.memory.getUint8(addr + i))
-      .map(v => `0x${v.toString(16).padStart(2, '0')}`)
+      .map((v) => `0x${v.toString(16).padStart(2, '0')}`)
       .join(' ');
 
     return `0x${addr.toString(16).padStart(4, '0')} : ${eightBytes}`;
@@ -76,7 +75,7 @@ class JPU {
     this.registerMap = createRegisterMap(registerNames);
   }
 
-  execute (instruction) {
+  execute(instruction) {
     switch (instruction) {
       // memory
       case MOV_LIT_REG: {
@@ -125,19 +124,19 @@ class JPU {
         const value2 = this.registers.getUint16(register2);
 
         this.setRegister('acc', value1 + value2);
-
-        return;
       }
+
+      // no default
     }
   }
 
-  step () {
+  step() {
     this.execute(this.fetch());
 
     return this;
   }
 
-  static createMemory (size) {
+  static createMemory(size) {
     return createMemory(size);
   }
 }

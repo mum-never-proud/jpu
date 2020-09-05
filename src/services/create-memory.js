@@ -1,4 +1,4 @@
-export default function (size) { // in bytes
+export default function createMemory(size) { // in bytes
   const buffer = new ArrayBuffer(size);
   const dv = new DataView(buffer);
 

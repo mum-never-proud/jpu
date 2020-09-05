@@ -4,10 +4,10 @@
   "description": "simple implementation of virtual machine",
   "main": "jpu.js",
   "scripts": {
-    "build": "parcel build ./src/jpu.js --global JPU",
-    "dev": "parcel watch ./src/jpu.js --global JPU",
+    "build": "parcel build ./src/jpu.js --global JPU -o jpu.min.js",
+    "dev": "parcel watch ./src/jpu.js --global JPU -o jpu.min.js",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test-coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -28,7 +28,10 @@
   "devDependencies": {
     "@babel/core": "7.10.2",
     "@babel/preset-env": "7.10.2",
-    "eslint": "7.1.0",
+    "eslint": "7.8.1",
+    "eslint-config-airbnb-base": "14.2.0",
+    "eslint-plugin-import": "2.22.0",
+    "eslint-plugin-jest": "24.0.0",
     "jest": "26.0.1",
     "parcel": "1.12.4"
   }

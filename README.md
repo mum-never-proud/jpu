@@ -1,5 +1,7 @@
 # jpu
 
-check out <a href="https://mum-never-proud.github.io/jpu/">jpu</a>!
+A simple VM in JS.
 
-simple implementation of virtual machine in js
+## Demo
+
+Check out <a href="https://mum-never-proud.github.io/jpu/">jpu</a>!

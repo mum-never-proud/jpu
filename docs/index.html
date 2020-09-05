@@ -5,52 +5,16 @@
   <title>jpu</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" type="text/css"
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300&display=swap" rel="stylesheet" />
-  <style>
-    html,
-    body {
-      font-family: "Fira Code";
-      background-color: #121212;
-      color: #FB3;
-    }
-
-    h1,
-    h3,
-    h6 {
-      margin: 0;
-    }
-
-    h1 {
-      font-size: 32px;
-    }
-
-    h3 {
-      font-size: 24px;
-    }
-
-    textarea.form-control, textarea.form-control:focus, textarea.form-control[readonly] {
-      background-color: #222831;
-      border: 1px solid #FB3;
-      color: #FB3;
-      outline: none;
-      resize: none;
-    }
-
-    .btn-primary:disabled {
-      cursor: not-allowed;
-    }
-
-    footer {
-      font-size: 12px;
-    }
-  </style>
+  <link href="https://cdn.jsdelivr.net/gh/mum-never-proud/unified-demo-theme/dist/styles/theme.min.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
+  <div class="header">
+    <h1 class="text-center">jpu</h1>
+  </div>
   <div class="container">
-    <div class="row">
+    <div class="row mt-3">
       <div class="col-12">
-        <p class="display-4 text-center mt-3">jpu (alpha)</p>
-        <p class="text-center font-italic mt-3">js based vm (16 bits)</p>
+        <p class="text-center">VM (16 bits) in JS</p>
       </div>
     </div>
     <div class="row mt-3">
@@ -93,15 +57,16 @@ mov_mem_reg 0xab 0xcd 5 # copy value from memory address to r4 register
         <textarea id="memory" rows="15" class="form-control" autocomplete="off" readonly></textarea>
       </div>
     </div>
-    <div class="row mt-3">
+    <div class="row mt-5">
       <div class="col-12">
         <footer>
-          <p class="text-center font-italic">made with much ❤️</p>
+          <p class="text-center">made with much<img alt="logo" src="https://cdn.jsdelivr.net/gh/mum-never-proud/unified-demo-theme@latest/dist/images/icecream-love.svg" width="50" height="50">
+          </p>
         </footer>
       </div>
     </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/gh/mum-never-proud/jpu/dist/jpu.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/mum-never-proud/jpu/dist/jpu.min.js"></script>
   <script>
     (function () {
       const memory = JPU.createMemory(256 * 256);

@@ -13,5 +13,5 @@ export {
   MOV_MEM_REG,
   MOV_REG_MEM,
   ADD_REG_REG,
-  JMP_NOT_EQ
+  JMP_NOT_EQ,
 };
